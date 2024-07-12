@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimal Text</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        textarea {
+            width: 90%;
+            height: 90%;
+            background-color: black;
+            color: lightgray;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 1.2em;
+            line-height: 1.5em;
+            padding: 20px;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+        }
+        .icons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        .icon {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="text-editor" placeholder="Empieza a escribir..."></textarea>
+    <div class="icons" id="icon-container">
+        <img src="icons/share.svg" class="icon" alt="Compartir" id="share-icon">
+        <img src="icons/fonts.svg" class="icon" alt="Cambiar fuente" id="font-icon">
+        <img src="icons/volume_on.svg" class="icon" alt="Sonido" id="volume-icon">
+        <img src="icons/open_full.svg" class="icon" alt="Pantalla completa" id="fullscreen-icon">
+
+    </div>
+    
+    <script>
+        const fullscreenIcon = document.getElementById('fullscreen-icon');
+        const shareIcon = document.getElementById('share-icon');
+        const fontIcon = document.getElementById('font-icon');
+        const volumeIcon = document.getElementById('volume-icon');
+        const iconContainer = document.getElementById('icon-container');
+        const textarea = document.getElementById('text-editor');
+        const fonts = [
+            "'Open Sans', sans-serif",
+            "'Playfair Display', serif",
+            "'Raleway', sans-serif",
+            "'Montserrat', sans-serif"
+        ];
+        let currentFontIndex = 0;
+        let soundEnabled = true;
+
+        const keySound = new Audio('audio/sound.mp3');
+
+        // Función para guardar el estado del editor en localStorage
+        function saveEditorState() {
+            localStorage.setItem('textEditorContent', textarea.value);
+            localStorage.setItem('currentFontIndex', currentFontIndex);
+            localStorage.setItem('soundEnabled', soundEnabled);
+        }
+
+        function loadEditorState() {
+            const savedText = localStorage.getItem('textEditorContent');
+            if (savedText) {
+                textarea.value = savedText;
+            }
+
+            const savedFontIndex = localStorage.getItem('currentFontIndex');
+            if (savedFontIndex !== null) {
+                currentFontIndex = parseInt(savedFontIndex, 10);
+                textarea.style.fontFamily = fonts[currentFontIndex];
+            }
+
+            const savedSoundEnabled = localStorage.getItem('soundEnabled');
+            if (savedSoundEnabled !== null) {
+                soundEnabled = JSON.parse(savedSoundEnabled);
+                volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+            }
+        }
+
+        // Cargar estado guardado al cargar la página
+        document.addEventListener('DOMContentLoaded', loadEditorState);
+
+        // Guardar estado al salir de la página
+        window.addEventListener('beforeunload', saveEditorState);
+
+        fullscreenIcon.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                document.activeElement.blur();
+            } else if (soundEnabled && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
+                keySound.currentTime = 0;
+                keySound.play();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                iconContainer.classList.add('hidden');
+            } else {
+                iconContainer.classList.remove('hidden');
+            }
+        });
+
+        shareIcon.addEventListener('click', () => {
+            const text = textarea.value;
+            const filename = prompt('Introduce el nombre del archivo (sin extensión):');
+            if (!filename) return;
+
+            const fileType = prompt('Introduce el formato del archivo (txt o docx):').toLowerCase();
+            if (fileType === 'txt') {
+                const blob = new Blob([text], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${filename}.txt`;
+                link.click();
+            } else if (fileType === 'docx') {
+                const blob = new Blob([text], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${filename}.docx`;
+                link.click();
+            } else {
+                alert('Formato no soportado. Usa "txt" o "docx".');
+            }
+        });
+
+        fontIcon.addEventListener('click', () => {
+            currentFontIndex = (currentFontIndex + 1) % fonts.length;
+            textarea.style.fontFamily = fonts[currentFontIndex];
+        });
+
+        volumeIcon.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+        });
+    </script>
+</body>
+</html>
