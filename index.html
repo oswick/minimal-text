@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="n-_6OltSv6jYo0N_XCA8Hp5vjSj3__BYaF_AP6UbQhw" />
-    <title>Minimal Text Editor</title>
+    <title>Minimal Text Editor Online</title>
     <meta name="description" content="Minimal-Text is a distraction-free text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/png" href="icons/logo1.jpg">
  
@@ -60,13 +60,19 @@
     </style>
 </head>
 <body>
-    <textarea id="text-editor" placeholder="Empieza a escribir..."></textarea>
+    <textarea id="text-editor" placeholder="Start writing..."></textarea>
     <div class="icons" id="icon-container">
-        <img src="icons/share.svg" class="icon" alt="Compartir" id="share-icon">
-        <img src="icons/fonts.svg" class="icon" alt="Cambiar fuente" id="font-icon">
-        <img src="icons/volume_on.svg" class="icon" alt="Sonido" id="volume-icon">
-        <img src="icons/open_full.svg" class="icon" alt="Pantalla completa" id="fullscreen-icon">
-        <img src="icons/hearth.svg" class="icon" alt="Hearth" id="hearth-icon"/>
+        <img src="icons/share.svg" class="icon" alt="Share" id="share-icon">
+        <img src="icons/fonts.svg" class="icon" alt="Change font" id="font-icon">
+        <img src="icons/volume_on.svg" class="icon" alt="Sound" id="volume-icon">
+        <img src="icons/open_full.svg" class="icon" alt="Full screen" id="fullscreen-icon">
+       
+       <a href="donate.html"><img src="icons/hearth.svg" class="icon" alt="Hearth" id="hearth-icon"/>
+        </a>
+
+
+
+
     </div>
     
     <script>
@@ -152,10 +158,10 @@
 
         shareIcon.addEventListener('click', () => {
             const text = textarea.value;
-            const filename = prompt('Introduce el nombre del archivo (sin extensión):');
+            const filename = prompt('Enter the file name (without extension):');
             if (!filename) return;
 
-            const fileType = prompt('Introduce el formato del archivo (txt o docx):').toLowerCase();
+            const fileType = prompt('Enter the file format (txt or docx):').toLowerCase();
             if (fileType === 'txt') {
                 const blob = new Blob([text], { type: 'text/plain' });
                 const link = document.createElement('a');
@@ -169,7 +175,7 @@
                 link.download = `${filename}.docx`;
                 link.click();
             } else {
-                alert('Formato no soportado. Usa "txt" o "docx".');
+                alert('Unsupported format. Use \"txt\" or \"docx\".');
             }
         });
 
