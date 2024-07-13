@@ -6,25 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="n-_6OltSv6jYo0N_XCA8Hp5vjSj3__BYaF_AP6UbQhw" />
     <title>Minimal Text Editor Online</title>
-    <meta name="description"
-        content="Minimal-Text is a distraction-free text editor with a completely black background, perfect for focused writing">
+    <meta name="description" content="Minimal-Text is a distraction-free text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/png" href="icons/logo1.jpg">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <style>
         body,
         html {
@@ -76,7 +69,6 @@
 
         }
 
-
         li {
             list-style: none;
             margin: 10px 10px;
@@ -89,9 +81,16 @@
             text-decoration: none;
         }
 
-
         .hidden {
             display: none;
+        }
+
+        .word-count {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: lightgray;
+            font-size: 1em;
         }
     </style>
 </head>
@@ -104,11 +103,10 @@
             <li><img src="icons/fonts.svg" class="icon" alt="Change font" title="Change font" id="font-icon"></li>
             <li><img src="icons/volume_on.svg" class="icon" alt="Sound" title="Sound" id="volume-icon"></li>
             <li><img src="icons/open_full.svg" class="icon" alt="Full screen" title="Full screen" id="fullscreen-icon"></li>
-
-            <li><a href="donate.html"><img src="icons/hearth.svg" class="icon" alt="Hearth" title="Donate" id="hearth-icon" />
-                </a></li>
+            <li><a href="donate.html"><img src="icons/hearth.svg" class="icon" alt="Hearth" title="Donate" id="hearth-icon"></a></li>
         </ul>
     </div>
+    <div class="word-count" id="word-count" title="Words">0</div>
 
     <script>
         const fullscreenIcon = document.getElementById('fullscreen-icon');
@@ -117,6 +115,7 @@
         const volumeIcon = document.getElementById('volume-icon');
         const iconContainer = document.getElementById('icon-container');
         const textarea = document.getElementById('text-editor');
+        const wordCount = document.getElementById('word-count');
         const fonts = [
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
@@ -127,6 +126,18 @@
         let soundEnabled = true;
 
         const keySound = new Audio('audio/sound.mp3');
+
+        // Función para contar palabras
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        // Función para actualizar el contador de palabras
+        function updateWordCount() {
+            wordCount.textContent = countWords(textarea.value);
+        }
+
+        textarea.addEventListener('input', updateWordCount);
 
         // Función para guardar el estado del editor en localStorage
         function saveEditorState() {
@@ -139,6 +150,7 @@
             const savedText = localStorage.getItem('textEditorContent');
             if (savedText) {
                 textarea.value = savedText;
+                updateWordCount();  // Actualiza el contador al cargar el contenido
             }
 
             const savedFontIndex = localStorage.getItem('currentFontIndex');
@@ -190,6 +202,8 @@
                 iconContainer.classList.remove('hidden');
             }
         });
+
+
 
         shareIcon.addEventListener('click', () => {
             const text = textarea.value;
