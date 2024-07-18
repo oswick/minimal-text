@@ -58,6 +58,26 @@
             border-color: white;
             list-style-type: none;
         }
+          ::-webkit-scrollbar {
+      width: 8px;  /* Ancho de la barra de desplazamiento vertical */
+      height: 8px; /* Altura de la barra de desplazamiento horizontal */
+    }
+
+    /* Personalizar el fondo de la barra de desplazamiento */
+    ::-webkit-scrollbar-track {
+      background: #000; /* Color de fondo del track (puedes cambiarlo a negro) */
+    }
+
+    /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
+    ::-webkit-scrollbar-thumb {
+      background: #444; /* Color del pulgar */
+      border-radius: 4px; /* Bordes ligeramente redondeados */
+    }
+
+    /* Cambiar el color del pulgar al pasar el cursor */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; /* Color del pulgar al pasar el cursor */
+    }
     </style>
 </head>
 
