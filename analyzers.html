@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="n-_6OltSv6jYo0N_XCA8Hp5vjSj3__BYaF_AP6UbQhw" />
+    <title>Minimal Distraction-Free Text Editor Online</title>
+    <meta name="description"
+        content="Minimal-Text is a distraction-free text editor with a completely black background, perfect for focused writing">
+    <link rel="icon" type="image/svg" href="icons/logo2.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            display: flex;
+            color: white;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+        }
+
+        #analyze-text {
+            width: 90%;
+            max-width: 900px;
+            height: 300px;
+            border: 1px solid #ccc;
+            background-color: #292929;
+            color: white;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        #analyze-result {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 20px;
+            color: white;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            list-style: none;
+            border-width: 1px;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .spellcheck {
+            margin: 5px;
+            padding: 5px;
+            background-color: rgb(29, 29, 29);
+            color: black;
+            list-style: none;
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow-back {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            position: absolute;
+            top: 0%;
+            left: 0%;
+            margin: 5px;
+            padding: 5px;
+        }
+        ::-webkit-scrollbar {
+      width: 8px;  /* Ancho de la barra de desplazamiento vertical */
+      height: 8px; /* Altura de la barra de desplazamiento horizontal */
+    }
+
+    /* Personalizar el fondo de la barra de desplazamiento */
+    ::-webkit-scrollbar-track {
+      background: #000; /* Color de fondo del track (puedes cambiarlo a negro) */
+    }
+
+    /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
+    ::-webkit-scrollbar-thumb {
+      background: #444; /* Color del pulgar */
+      border-radius: 4px; /* Bordes ligeramente redondeados */
+    }
+
+    /* Cambiar el color del pulgar al pasar el cursor */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; /* Color del pulgar al pasar el cursor */
+    }
+    </style>
+</head>
+
+<body>
+    <a href="editor.html"><img src="icons/arrow_back.svg" alt="arrow-back" class="arrow-back" title="Back" /></a>
+
+    <h1>Text Analyzer</h1>
+    <div id="analyze-text" contenteditable="false"></div>
+    <div id="analyze-result"></div>
+    <img src="icons/spellcheck.svg" title="Check Text" id="analyze-button" class="spellcheck" />
+
+    <script>
+        // Cargar el contenido guardado desde localStorage
+        const analyzeText = document.getElementById('analyze-text');
+        const analyzeResult = document.getElementById('analyze-result');
+        const savedText = localStorage.getItem('textEditorContent');
+        if (savedText) {
+            analyzeText.textContent = savedText;
+        }
+
+        // Añadir funcionalidad de análisis
+        document.getElementById('analyze-button').addEventListener('click', () => {
+            const text = analyzeText.textContent;
+
+            // Realizar los análisis
+            const lexicalDensity = calculateLexicalDensity(text);
+            const lexicalDiversity = calculateLexicalDiversity(text);
+            const wordFrequency = calculateWordFrequency(text);
+            const averageSentenceLength = calculateAverageSentenceLength(text);
+            const complexWords = countComplexWords(text);
+
+            analyzeResult.innerHTML = `
+                <p><strong>Lexical Density:</strong> ${lexicalDensity}%</p>
+                <p><strong>Lexical Diversity:</strong> ${lexicalDiversity}</p>
+                <p><strong>Average Sentence Length:</strong> ${averageSentenceLength} words</p>
+                <p><strong>Complex Words:</strong> ${complexWords}</p>
+                <h3>Word Frequency:</h3>
+                <ul>${wordFrequency.map(word => `<li>${word.word}: ${word.count}</li>`).join('')}</ul>
+            `;
+        });
+
+        function calculateLexicalDensity(text) {
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const uniqueWords = [...new Set(words)];
+            return (uniqueWords.length / words.length * 100).toFixed(2);
+        }
+
+        function calculateLexicalDiversity(text) {
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const uniqueWords = [...new Set(words)];
+            return (uniqueWords.length / words.length).toFixed(2);
+        }
+
+        function calculateWordFrequency(text) {
+            const words = text.trim().toLowerCase().split(/\s+/).filter(word => word.length > 0);
+            const frequency = {};
+            words.forEach(word => {
+                frequency[word] = (frequency[word] || 0) + 1;
+            });
+            const sortedFrequency = Object.keys(frequency)
+                .map(word => ({ word, count: frequency[word] }))
+                .sort((a, b) => b.count - a.count);
+            return sortedFrequency.slice(0, 10); // Mostrar las 10 palabras más frecuentes
+        }
+
+        function calculateAverageSentenceLength(text) {
+            const sentences = text.split(/[.!?]/).filter(sentence => sentence.trim().length > 0);
+            const totalWords = sentences.reduce((acc, sentence) => acc + sentence.split(/\s+/).filter(word => word.length > 0).length, 0);
+            return (totalWords / sentences.length).toFixed(2);
+        }
+
+        function countComplexWords(text) {
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            const complexWords = words.filter(word => word.match(/[aeiou]{3,}/i));
+            return complexWords.length;
+        }
+    </script>
+</body>
+
+</html>

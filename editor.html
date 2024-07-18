@@ -88,10 +88,7 @@
             text-decoration: none;
         }
 
-        .hidden {
-            display: none;
-        }
-
+      
         .word-count {
             position: fixed;
             bottom: 10px;
@@ -99,22 +96,47 @@
             color: lightgray;
             font-size: 1em;
         }
+
+        ::-webkit-scrollbar {
+      width: 8px;  /* Ancho de la barra de desplazamiento vertical */
+      height: 8px; /* Altura de la barra de desplazamiento horizontal */
+    }
+
+    /* Personalizar el fondo de la barra de desplazamiento */
+    ::-webkit-scrollbar-track {
+      background: #000; /* Color de fondo del track (puedes cambiarlo a negro) */
+    }
+
+    /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
+    ::-webkit-scrollbar-thumb {
+      background: #444; /* Color del pulgar */
+      border-radius: 4px; /* Bordes ligeramente redondeados */
+    }
+
+    /* Cambiar el color del pulgar al pasar el cursor */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; /* Color del pulgar al pasar el cursor */
+    }
     </style>
 </head>
 
 <body>
-    <textarea id="text-editor" placeholder="Start writing..."></textarea>
+    <textarea id="text-editor" placeholder="Start writing...
+    tiktoker el que lo lea :P"></textarea>
     <div class="icons" id="icon-container">
         <ul>
-            <li><img src="icons/font.svg" class="icon" alt="Change font" title="Change font" id="font-icon"></li>
+            <li><img src="icons/font.svg" class="icon" alt="Change font" title="Fonts" id="font-icon"></li>
             <li><img src="icons/volume_on.svg" class="icon" alt="Sound" title="Sound" id="volume-icon"></li>
             <li><img src="icons/save.svg" class="icon" alt="Save" title="Save" id="save-icon"></li>
             <li><img src="icons/open_full.svg" class="icon" alt="Full screen" title="Full screen" id="fullscreen-icon">
+            <li><img src="icons/analyze.svg" class="icon" alt="Analyze" title="Analyze" id="analyze-icon"></li>
+
         </ul>
     </div>
     <div class="word-count" id="word-count" title="Words">0</div>
 
     <script>
+
         const fullscreenIcon = document.getElementById('fullscreen-icon');
         const saveIcon = document.getElementById('save-icon');
         const fontIcon = document.getElementById('font-icon');
@@ -122,6 +144,7 @@
         const iconContainer = document.getElementById('icon-container');
         const textarea = document.getElementById('text-editor');
         const wordCount = document.getElementById('word-count');
+        const analyzeIcon = document.getElementById('analyze-icon');
         const fonts = [
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
@@ -143,7 +166,13 @@
             wordCount.textContent = countWords(textarea.value);
         }
 
+        analyzeIcon.addEventListener('click', () => {
+            // Guarda el contenido actual del editor en localStorage
+            saveEditorState();
 
+            // Redirige a analyzers.html
+            window.location.href = 'analyzers.html';
+        });
 
         textarea.addEventListener('input', updateWordCount);
 
