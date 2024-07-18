@@ -243,26 +243,32 @@
 
         saveIcon.addEventListener('click', () => {
             const text = textarea.value;
-            const filename = prompt('Enter the file name (without extension):');
+            const filename = prompt('Enter the file name (including extension, e.g., filename.txt or filename.docx):');
             if (!filename) return;
 
-            const fileType = prompt('Enter the file format (txt or docx):').toLowerCase();
-            if (fileType === 'txt') {
+            const [name, extension] = filename.split('.');
+            if (!extension) {
+                alert('Please include the file extension.');
+                return;
+            }
+
+            if (extension === 'txt') {
                 const blob = new Blob([text], { type: 'text/plain' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `${filename}.txt`;
+                link.download = filename;
                 link.click();
-            } else if (fileType === 'docx') {
+            } else if (extension === 'docx') {
                 const blob = new Blob([text], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = `${filename}.docx`;
+                link.download = filename;
                 link.click();
             } else {
-                alert('Unsupported format. Use \"txt\" or \"docx\".');
+                alert('Unsupported format. Use "txt" or "docx".');
             }
         });
+
 
         fontIcon.addEventListener('click', () => {
             currentFontIndex = (currentFontIndex + 1) % fonts.length;
