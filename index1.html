@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="n-_6OltSv6jYo0N_XCA8Hp5vjSj3__BYaF_AP6UbQhw" />
+    <title>Minimal Distraction-Free Text Editor Online</title>
+    <meta name="description"
+        content="Minimal-Text is a distraction-free text editor with a completely black background, perfect for focused writing">
+    <link rel="icon" type="image/svg" href="icons/logo2.svg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: monospace;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+            color: white;
+            flex-direction: column;
+        }
+
+        .homeIcons {
+            margin: 5px;
+            padding: 5px;
+            background-color: rgb(29, 29, 29);
+            color: black;
+            list-style: none;
+            border-radius: 10px;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0;
+            text-align: center;
+            color: white;
+            border-color: white;
+            list-style-type: none;
+        }
+          ::-webkit-scrollbar {
+      width: 8px;  /* Ancho de la barra de desplazamiento vertical */
+      height: 8px; /* Altura de la barra de desplazamiento horizontal */
+    }
+
+    /* Personalizar el fondo de la barra de desplazamiento */
+    ::-webkit-scrollbar-track {
+      background: #000; /* Color de fondo del track (puedes cambiarlo a negro) */
+    }
+
+    /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
+    ::-webkit-scrollbar-thumb {
+      background: #444; /* Color del pulgar */
+      border-radius: 4px; /* Bordes ligeramente redondeados */
+    }
+
+    /* Cambiar el color del pulgar al pasar el cursor */
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555; /* Color del pulgar al pasar el cursor */
+    }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <h1>Minimal Distraction-Free Text Editor</h1>
+    <p>100% private, only you can see what you type!</p>
+    <br>
+    <ul class="homeIcons">
+        <li><a class="new" title="New" href="editor.html"><img src="icons/new.svg" /></a></li>
+    </ul>
+
+
+    <footer>
+        <p>&copy 2024 HOMO STUDIOS</p>
+    </footer>
+    <script defer type="text/javascript" src="/main.js"></script>
+</body>
+
+</html>

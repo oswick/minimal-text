@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -26,76 +26,271 @@
         href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
     <style>
-        body {
-            font-family: monospace;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            display: flex;
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100vh;
+            height: 100%;
+            background-color: rgb(0, 0, 0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        textarea {
+            width: 90%;
+            height: 90%;
             background-color: black;
-            color: white;
-            flex-direction: column;
+            color: lightgray;
+            border: none;
+            outline: none;
+            resize: none;
+            font-size: 1.2em;
+            line-height: 1.5em;
+            padding: auto;
+            box-sizing: border-box;
+            font-family: monospace;
         }
 
-        .homeIcons {
-            margin: 5px;
-            padding: 5px;
-            background-color: rgb(29, 29, 29);
-            color: black;
+        .icons {
+            position: fixed;
+            top: 50%;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            border-radius: 8px 0 0 8px;
+
+        }
+
+        .icon {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+
+        }
+
+        .icon ul {
+            padding: 0;
+            margin: 0;
+
+        }
+
+        li {
             list-style: none;
-            border-radius: 10px;
+            margin: 5px 5px;
+
         }
 
-        footer {
-            position: absolute;
-            bottom: 0;
-            text-align: center;
+        .icon a {
+            display: block;
             color: white;
-            border-color: white;
-            list-style-type: none;
+            text-decoration: none;
         }
-          ::-webkit-scrollbar {
-      width: 8px;  /* Ancho de la barra de desplazamiento vertical */
-      height: 8px; /* Altura de la barra de desplazamiento horizontal */
-    }
 
-    /* Personalizar el fondo de la barra de desplazamiento */
-    ::-webkit-scrollbar-track {
-      background: #000; /* Color de fondo del track (puedes cambiarlo a negro) */
-    }
 
-    /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
-    ::-webkit-scrollbar-thumb {
-      background: #444; /* Color del pulgar */
-      border-radius: 4px; /* Bordes ligeramente redondeados */
-    }
+        .word-count {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: lightgray;
+            font-size: 1em;
+        }
 
-    /* Cambiar el color del pulgar al pasar el cursor */
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555; /* Color del pulgar al pasar el cursor */
-    }
+        ::-webkit-scrollbar {
+            width: 8px;
+            /* Ancho de la barra de desplazamiento vertical */
+            height: 8px;
+            /* Altura de la barra de desplazamiento horizontal */
+        }
+
+        /* Personalizar el fondo de la barra de desplazamiento */
+        ::-webkit-scrollbar-track {
+            background: #000;
+            /* Color de fondo del track (puedes cambiarlo a negro) */
+        }
+
+        /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            /* Color del pulgar */
+            border-radius: 4px;
+            /* Bordes ligeramente redondeados */
+        }
+
+        /* Cambiar el color del pulgar al pasar el cursor */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+            /* Color del pulgar al pasar el cursor */
+        }
     </style>
 </head>
 
 <body>
-    <div id="root"></div>
+    <textarea id="text-editor" placeholder="Start writing..."></textarea>
+    <div class="icons" id="icon-container">
+        <ul>
+            <li><img src="icons/font.svg" class="icon" alt="Change font" title="Fonts" id="font-icon"></li>
+            <li><img src="icons/volume_on.svg" class="icon" alt="Sound" title="Sound" id="volume-icon"></li>
+            <li><img src="icons/save.svg" class="icon" alt="Save" title="Save" id="save-icon"></li>
+            <li><img src="icons/open_full.svg" class="icon" alt="Full screen" title="Full screen" id="fullscreen-icon">
+            <li><img src="icons/analyze.svg" class="icon" alt="Analyze" title="Analyze" id="analyze-icon"></li>
+        </ul>
+    </div>
+    <div class="word-count" id="word-count" title="Words">0</div>
 
-    <h1>Minimal Distraction-Free Text Editor</h1>
-    <p>100% private, only you can see what you type!</p>
-    <br>
-    <ul class="homeIcons">
-        <li><a class="new" title="New" href="editor.html"><img src="icons/new.svg" /></a></li>
-    </ul>
+    <script>
+
+        const fullscreenIcon = document.getElementById('fullscreen-icon');
+        const saveIcon = document.getElementById('save-icon');
+        const fontIcon = document.getElementById('font-icon');
+        const volumeIcon = document.getElementById('volume-icon');
+        const iconContainer = document.getElementById('icon-container');
+        const textarea = document.getElementById('text-editor');
+        const wordCount = document.getElementById('word-count');
+        const analyzeIcon = document.getElementById('analyze-icon');
+        const fonts = [
+            "'Open Sans', sans-serif",
+            "'Playfair Display', serif",
+            "'Raleway', sans-serif",
+            "'Montserrat', sans-serif"
+        ];
+        let currentFontIndex = 0;
+        let soundEnabled = true;
+
+        const keySound = new Audio('audio/sound.mp3');
+
+        // Función para contar palabras
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+        }
+
+        // Función para actualizar el contador de palabras
+        function updateWordCount() {
+            wordCount.textContent = countWords(textarea.value);
+        }
+
+        analyzeIcon.addEventListener('click', () => {
+            // Guarda el contenido actual del editor en localStorage
+            saveEditorState();
+
+            // Redirige a analyzers.html
+            window.location.href = 'analyzers.html';
+        });
+
+        textarea.addEventListener('input', updateWordCount);
+
+        // Función para guardar el estado del editor en localStorage
+        function saveEditorState() {
+            localStorage.setItem('textEditorContent', textarea.value);
+            localStorage.setItem('currentFontIndex', currentFontIndex);
+            localStorage.setItem('soundEnabled', soundEnabled);
+        }
+
+        function loadEditorState() {
+            const savedText = localStorage.getItem('textEditorContent');
+            if (savedText) {
+                textarea.value = savedText;
+                updateWordCount();  // Actualiza el contador al cargar el contenido
+            }
+
+            const savedFontIndex = localStorage.getItem('currentFontIndex');
+            if (savedFontIndex !== null) {
+                currentFontIndex = parseInt(savedFontIndex, 10);
+                textarea.style.fontFamily = fonts[currentFontIndex];
+            }
+
+            const savedSoundEnabled = localStorage.getItem('soundEnabled');
+            if (savedSoundEnabled !== null) {
+                soundEnabled = JSON.parse(savedSoundEnabled);
+                volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+            }
+        }
+
+        // Cargar estado guardado al cargar la página
+        document.addEventListener('DOMContentLoaded', loadEditorState);
+
+        // Guardar estado al salir de la página
+        window.addEventListener('beforeunload', saveEditorState);
+
+        fullscreenIcon.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                document.activeElement.blur();
+            } else if (soundEnabled && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
+                keySound.currentTime = 0;
+                keySound.play();
+            }
+        });
+
+        fullscreenIcon.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            fullscreenIcon.src = document.fullscreenElement ? 'icons/close_full.svg' : 'icons/open_full.svg';
+        });
 
 
-    <footer>
-        <p>&copy 2024 HOMO STUDIOS</p>
-    </footer>
-    <script defer type="text/javascript" src="/main.js"></script>
+
+        saveIcon.addEventListener('click', () => {
+            const text = textarea.value;
+            const filename = prompt('Enter the file name (including extension, e.g., filename.txt or filename.docx):');
+            if (!filename) return;
+
+            const [name, extension] = filename.split('.');
+            if (!extension) {
+                alert('Please include the file extension.');
+                return;
+            }
+
+            if (extension === 'txt') {
+                const blob = new Blob([text], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+            } else if (extension === 'docx') {
+                const blob = new Blob([text], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+            } else {
+                alert('Unsupported format. Use "txt" or "docx".');
+            }
+        });
+
+
+        fontIcon.addEventListener('click', () => {
+            currentFontIndex = (currentFontIndex + 1) % fonts.length;
+            textarea.style.fontFamily = fonts[currentFontIndex];
+        });
+
+        volumeIcon.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+        });
+    </script>
 </body>
 
 </html>
