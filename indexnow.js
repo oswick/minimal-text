@@ -32,10 +32,10 @@
   
     // Datos de ejemplo
     const host = 'https://distraction-free-editor.netlify.app/';
-    const key = '411134fa19c541168f74d3e488b5db41';
-    const keyLocation = 'https://distraction-free-editor.netlify.app/411134fa19c541168f74d3e488b5db41.txt';
+    const key = 'cca4a7ad8c934a0eb8675f2238f81c4e';
+    const keyLocation = 'https://distraction-free-editor.vercel.app/cca4a7ad8c934a0eb8675f2238f81c4e.txt';
     const urlList = [
-      'https://distraction-free-editor.netlify.app/'
+      'https://distraction-free-editor.vercel.app/'
     ];
   
     // Enviar URLs a IndexNow
