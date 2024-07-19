@@ -31,7 +31,7 @@
     }
   
     // Datos de ejemplo
-    const host = 'https://distraction-free-editor.netlify.app/';
+    const host = 'https://distraction-free-editor.vercel.app/';
     const key = 'cca4a7ad8c934a0eb8675f2238f81c4e';
     const keyLocation = 'https://distraction-free-editor.vercel.app/cca4a7ad8c934a0eb8675f2238f81c4e.txt';
     const urlList = [
