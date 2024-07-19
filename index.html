@@ -9,6 +9,7 @@
     <meta name="description"
         content="Minimal Distraction-Free is a private text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/svg" href="icons/logo2.svg">
+    <link rel="manifest" href="manifest.json">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -141,6 +142,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            display: none;
         }
 
         #close-popup {
@@ -209,116 +211,94 @@
             "'Montserrat', sans-serif"
         ];
         let currentFontIndex = 0;
-        let soundEnabled = true;
-
-        const keySound = new Audio('audio/sound.mp3');
-
-        // Función para contar palabras
-        function countWords(text) {
-            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
-        }
-
-        // Función para actualizar el contador de palabras
-        function updateWordCount() {
-            wordCount.textContent = countWords(textarea.value);
-        }
-
-        analyzeIcon.addEventListener('click', () => {
-            // Guarda el contenido actual del editor en localStorage
-            saveEditorState();
-
-            // Redirige a analyzers.html
-            window.location.href = 'analyzers.html';
-        });
-
-        textarea.addEventListener('input', updateWordCount);
-
-        // Función para guardar el estado del editor en localStorage
-        function saveEditorState() {
-            localStorage.setItem('textEditorContent', textarea.value);
-            localStorage.setItem('currentFontIndex', currentFontIndex);
-            localStorage.setItem('soundEnabled', soundEnabled);
-        }
-
-        function loadEditorState() {
-            const savedContent = localStorage.getItem('textEditorContent');
-            const savedFontIndex = localStorage.getItem('currentFontIndex');
-            const savedSoundState = localStorage.getItem('soundEnabled');
-
-            if (savedContent !== null) {
-                textarea.value = savedContent;
-                updateWordCount();
-            }
-
-            if (savedFontIndex !== null) {
-                currentFontIndex = parseInt(savedFontIndex, 10);
-                textarea.style.fontFamily = fonts[currentFontIndex];
-            }
-
-            if (savedSoundState !== null) {
-                soundEnabled = savedSoundState === 'true';
-                volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
-            }
-        }
-
-        fullscreenIcon.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        volumeIcon.addEventListener('click', () => {
-            soundEnabled = !soundEnabled;
-            volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
-            saveEditorState();
-        });
-
-        fontIcon.addEventListener('click', () => {
-            currentFontIndex = (currentFontIndex + 1) % fonts.length;
-            textarea.style.fontFamily = fonts[currentFontIndex];
-            saveEditorState();
-        });
-
-        saveIcon.addEventListener('click', () => {
-            const textToSave = textarea.value;
-            const blob = new Blob([textToSave], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'document.txt';
-            link.click();
-            URL.revokeObjectURL(url);
-        });
-
-        textarea.addEventListener('keypress', (event) => {
-            if (soundEnabled) {
-                keySound.currentTime = 0;
-                keySound.play();
-            }
-        });
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape') {
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        // Cargar el estado del editor al cargar la página
-        window.addEventListener('load', loadEditorState);
+        let isMuted = false;
+        let isFullscreen = false;
 
         infoIcon.addEventListener('click', () => {
             popup.style.display = 'block';
-
         });
 
         closePopup.addEventListener('click', () => {
             popup.style.display = 'none';
+        });
+
+        function saveText() {
+            const text = textarea.value;
+            localStorage.setItem('savedText', text);
+            alert('Text saved locally!');
+        }
+
+        function loadText() {
+            const savedText = localStorage.getItem('savedText');
+            if (savedText) {
+                textarea.value = savedText;
+            }
+        }
+
+        function updateWordCount() {
+            const text = textarea.value.trim();
+            const words = text.split(/\s+/);
+            const wordCountValue = words.filter(word => word.length > 0).length;
+            wordCount.innerText = wordCountValue;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+                isFullscreen = true;
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+                isFullscreen = false;
+            }
+        }
+
+        function toggleVolume() {
+            isMuted = !isMuted;
+            volumeIcon.src = isMuted ? 'icons/volume_off.svg' : 'icons/volume_on.svg';
+            localStorage.setItem('isMuted', isMuted);
+        }
+
+        function changeFont() {
+            currentFontIndex = (currentFontIndex + 1) % fonts.length;
+            textarea.style.fontFamily = fonts[currentFontIndex];
+        }
+
+        function analyzeText() {
+            const text = textarea.value;
+            alert(`Text Analysis: \nLength: ${text.length} characters\nWord Count: ${wordCount.innerText}`);
+        }
+
+        saveIcon.addEventListener('click', saveText);
+        fullscreenIcon.addEventListener('click', toggleFullscreen);
+        fontIcon.addEventListener('click', changeFont);
+        volumeIcon.addEventListener('click', toggleVolume);
+        textarea.addEventListener('input', updateWordCount);
+        analyzeIcon.addEventListener('click', analyzeText);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadText();
+            updateWordCount();
+
+            const savedFontIndex = localStorage.getItem('fontIndex');
+            if (savedFontIndex) {
+                currentFontIndex = parseInt(savedFontIndex, 10);
+                textarea.style.fontFamily = fonts[currentFontIndex];
+            }
+
+            const savedVolumeState = localStorage.getItem('isMuted');
+            if (savedVolumeState) {
+                isMuted = savedVolumeState === 'true';
+                volumeIcon.src = isMuted ? 'icons/volume_off.svg' : 'icons/volume_on.svg';
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            isFullscreen = !!document.fullscreenElement;
+        });
+
+        window.addEventListener('beforeunload', () => {
+            localStorage.setItem('savedText', textarea.value);
+            localStorage.setItem('fontIndex', currentFontIndex);
         });
     </script>
 </body>

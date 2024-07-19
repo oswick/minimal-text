@@ -1,0 +1,16 @@
+{
+    "name": "Minimal Distraction-Free Text Editor",
+    "short_name": "Text Editor",
+    "description": "A minimal distraction-free text editor with a black background and light gray text.",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#000000",
+    "theme_color": "#000000",
+    "icons": [
+        {
+            "src": "icons/logo2.svg",
+            "sizes": "32x32",
+            "type": "image/svg+xml"
+        }
+    ]
+}
