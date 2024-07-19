@@ -183,16 +183,10 @@
         <p>I don't storage or collect any data, all you type here is stored in your browser.</p>
         <p>I'm work alone, I'm not a big coorporation trying to steal your data, i swear. :D</p>
         <p>If you find this web useful, you can donate me, but it's up to you.</p>
-
-        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
-            data-name="bmc-button" data-slug="ozwick" data-color="#000000" data-emoji="🍕" data-font="Bree"
-            data-text="Buy me a pizza" data-outline-color="#ffffff" data-font-color="#ffffff"
-            data-coffee-color="#FFDD00"></script>
         <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
-
     </div>
-
     <script>
+
         const fullscreenIcon = document.getElementById('fullscreen-icon');
         const saveIcon = document.getElementById('save-icon');
         const fontIcon = document.getElementById('font-icon');
@@ -202,8 +196,9 @@
         const wordCount = document.getElementById('word-count');
         const analyzeIcon = document.getElementById('analyze-icon');
         const infoIcon = document.getElementById('info-icon');
-        const closePopup = document.getElementById('close-popup');
         const popup = document.getElementById('popup');
+        const closePopup = document.getElementById('close-popup');
+
         const fonts = [
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
@@ -211,8 +206,7 @@
             "'Montserrat', sans-serif"
         ];
         let currentFontIndex = 0;
-        let isMuted = false;
-        let isFullscreen = false;
+        let soundEnabled = true;
 
         infoIcon.addEventListener('click', () => {
             popup.style.display = 'block';
@@ -222,95 +216,149 @@
             popup.style.display = 'none';
         });
 
-        function saveText() {
-            const text = textarea.value;
-            localStorage.setItem('savedText', text);
-            alert('Text saved locally!');
+
+        const keySound = new Audio('audio/sound.mp3');
+
+        // Función para contar palabras
+        function countWords(text) {
+            return text.trim().split(/\s+/).filter(word => word.length > 0).length;
         }
 
-        function loadText() {
-            const savedText = localStorage.getItem('savedText');
+        // Función para actualizar el contador de palabras
+        function updateWordCount() {
+            wordCount.textContent = countWords(textarea.value);
+        }
+
+        analyzeIcon.addEventListener('click', () => {
+            // Guarda el contenido actual del editor en localStorage
+            saveEditorState();
+
+            // Redirige a analyzers.html
+            window.location.href = 'analyzers.html';
+        });
+
+        textarea.addEventListener('input', updateWordCount);
+
+        // Función para guardar el estado del editor en localStorage
+        function saveEditorState() {
+            localStorage.setItem('textEditorContent', textarea.value);
+            localStorage.setItem('currentFontIndex', currentFontIndex);
+            localStorage.setItem('soundEnabled', soundEnabled);
+        }
+
+        function loadEditorState() {
+            const savedText = localStorage.getItem('textEditorContent');
             if (savedText) {
                 textarea.value = savedText;
+                updateWordCount();  // Actualiza el contador al cargar el contenido
             }
-        }
 
-        function updateWordCount() {
-            const text = textarea.value.trim();
-            const words = text.split(/\s+/);
-            const wordCountValue = words.filter(word => word.length > 0).length;
-            wordCount.innerText = wordCountValue;
-        }
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-                isFullscreen = true;
-            } else if (document.exitFullscreen) {
-                document.exitFullscreen();
-                isFullscreen = false;
-            }
-        }
-
-        function toggleVolume() {
-            isMuted = !isMuted;
-            volumeIcon.src = isMuted ? 'icons/volume_off.svg' : 'icons/volume_on.svg';
-            localStorage.setItem('isMuted', isMuted);
-        }
-
-        function changeFont() {
-            currentFontIndex = (currentFontIndex + 1) % fonts.length;
-            textarea.style.fontFamily = fonts[currentFontIndex];
-        }
-
-        function analyzeText() {
-            const text = textarea.value;
-            alert(`Text Analysis: \nLength: ${text.length} characters\nWord Count: ${wordCount.innerText}`);
-        }
-
-        saveIcon.addEventListener('click', saveText);
-        fullscreenIcon.addEventListener('click', toggleFullscreen);
-        fontIcon.addEventListener('click', changeFont);
-        volumeIcon.addEventListener('click', toggleVolume);
-        textarea.addEventListener('input', updateWordCount);
-        analyzeIcon.addEventListener('click', analyzeText);
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadText();
-            updateWordCount();
-
-            const savedFontIndex = localStorage.getItem('fontIndex');
-            if (savedFontIndex) {
+            const savedFontIndex = localStorage.getItem('currentFontIndex');
+            if (savedFontIndex !== null) {
                 currentFontIndex = parseInt(savedFontIndex, 10);
                 textarea.style.fontFamily = fonts[currentFontIndex];
             }
 
-            const savedVolumeState = localStorage.getItem('isMuted');
-            if (savedVolumeState) {
-                isMuted = savedVolumeState === 'true';
-                volumeIcon.src = isMuted ? 'icons/volume_off.svg' : 'icons/volume_on.svg';
+            const savedSoundEnabled = localStorage.getItem('soundEnabled');
+            if (savedSoundEnabled !== null) {
+                soundEnabled = JSON.parse(savedSoundEnabled);
+                volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+            }
+        }
+
+        // Cargar estado guardado al cargar la página
+        document.addEventListener('DOMContentLoaded', loadEditorState);
+
+        // Guardar estado al salir de la página
+        window.addEventListener('beforeunload', saveEditorState);
+
+        fullscreenIcon.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                document.activeElement.blur();
+            } else if (soundEnabled && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
+                keySound.currentTime = 0;
+                keySound.play();
+            }
+        });
+
+        fullscreenIcon.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
         });
 
         document.addEventListener('fullscreenchange', () => {
-            isFullscreen = !!document.fullscreenElement;
+            fullscreenIcon.src = document.fullscreenElement ? 'icons/close_full.svg' : 'icons/open_full.svg';
         });
 
-        window.addEventListener('beforeunload', () => {
-            localStorage.setItem('savedText', textarea.value);
-            localStorage.setItem('fontIndex', currentFontIndex);
+
+
+        saveIcon.addEventListener('click', () => {
+            const text = textarea.value;
+            const filename = prompt('Enter the file name (including extension, e.g., filename.txt or filename.docx):');
+            if (!filename) return;
+
+            const [name, extension] = filename.split('.');
+            if (!extension) {
+                alert('Please include the file extension.');
+                return;
+            }
+
+            if (extension === 'txt') {
+                const blob = new Blob([text], { type: 'text/plain' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+            } else if (extension === 'docx') {
+                const blob = new Blob([text], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
+            } else {
+                alert('Unsupported format. Use "txt" or "docx".');
+            }
         });
-    </script>
-     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, (err) => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
-            });
-        }
+
+
+        fontIcon.addEventListener('click', () => {
+            currentFontIndex = (currentFontIndex + 1) % fonts.length;
+            textarea.style.fontFamily = fonts[currentFontIndex];
+        });
+
+        volumeIcon.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+        });
+
+        document.getElementById('info-icon').addEventListener('click', function () {
+            var popup = document.getElementById('popup');
+            popup.style.display = 'block';
+        });
+
+        document.getElementById('close-icon').addEventListener('click', function () {
+            var popup = document.getElementById('popup');
+            popup.style.display = 'none';
+        });
     </script>
 </body>
 
