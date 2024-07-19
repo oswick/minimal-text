@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -88,26 +89,33 @@
             margin: 5px;
             padding: 5px;
         }
+
         ::-webkit-scrollbar {
-      width: 8px;  /* Ancho de la barra de desplazamiento vertical */
-      height: 8px; /* Altura de la barra de desplazamiento horizontal */
-    }
+            width: 8px;
+            /* Ancho de la barra de desplazamiento vertical */
+            height: 8px;
+            /* Altura de la barra de desplazamiento horizontal */
+        }
 
-    /* Personalizar el fondo de la barra de desplazamiento */
-    ::-webkit-scrollbar-track {
-      background: #000; /* Color de fondo del track (puedes cambiarlo a negro) */
-    }
+        /* Personalizar el fondo de la barra de desplazamiento */
+        ::-webkit-scrollbar-track {
+            background: #000;
+            /* Color de fondo del track (puedes cambiarlo a negro) */
+        }
 
-    /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
-    ::-webkit-scrollbar-thumb {
-      background: #444; /* Color del pulgar */
-      border-radius: 4px; /* Bordes ligeramente redondeados */
-    }
+        /* Personalizar el pulgar (thumb) de la barra de desplazamiento */
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            /* Color del pulgar */
+            border-radius: 4px;
+            /* Bordes ligeramente redondeados */
+        }
 
-    /* Cambiar el color del pulgar al pasar el cursor */
-    ::-webkit-scrollbar-thumb:hover {
-      background: #555; /* Color del pulgar al pasar el cursor */
-    }
+        /* Cambiar el color del pulgar al pasar el cursor */
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+            /* Color del pulgar al pasar el cursor */
+        }
     </style>
 </head>
 
@@ -139,12 +147,16 @@
             const wordFrequency = calculateWordFrequency(text);
             const averageSentenceLength = calculateAverageSentenceLength(text);
             const complexWords = countComplexWords(text);
+            const readingTime = calculateReadingTime(text);
+            const speakingTime = calculateSpeakingTime(text);
 
             analyzeResult.innerHTML = `
                 <p><strong>Lexical Density:</strong> ${lexicalDensity}%</p>
                 <p><strong>Lexical Diversity:</strong> ${lexicalDiversity}</p>
                 <p><strong>Average Sentence Length:</strong> ${averageSentenceLength} words</p>
                 <p><strong>Complex Words:</strong> ${complexWords}</p>
+                <p><strong>Estimated Reading Time:</strong> ${readingTime} minutes</p>
+                <p><strong>Estimated Speaking Time:</strong> ${speakingTime} minutes</p>
                 <h3>Word Frequency:</h3>
                 <ul>${wordFrequency.map(word => `<li>${word.word}: ${word.count}</li>`).join('')}</ul>
             `;
@@ -184,6 +196,18 @@
             const words = text.trim().split(/\s+/).filter(word => word.length > 0);
             const complexWords = words.filter(word => word.match(/[aeiou]{3,}/i));
             return complexWords.length;
+        }
+
+        function calculateReadingTime(text) {
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+            const readingTime = (words / 200).toFixed(2); // Asumiendo una velocidad de lectura de 200 palabras por minuto
+            return readingTime;
+        }
+
+        function calculateSpeakingTime(text) {
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+            const speakingTime = (words / 150).toFixed(2); // Asumiendo una velocidad de habla de 150 palabras por minuto
+            return speakingTime;
         }
     </script>
 </body>

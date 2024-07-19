@@ -60,26 +60,22 @@
             transform: translateY(-50%);
             display: flex;
             border-radius: 8px 0 0 8px;
-
         }
 
         .icon {
             width: 30px;
             height: 30px;
             cursor: pointer;
-
         }
 
         .icon ul {
             padding: 0;
             margin: 0;
-
         }
 
         li {
             list-style: none;
             margin: 5px 5px;
-
         }
 
         .icon a {
@@ -87,7 +83,6 @@
             color: white;
             text-decoration: none;
         }
-
 
         .word-count {
             position: fixed;
@@ -123,6 +118,42 @@
             background: #555;
             /* Color del pulgar al pasar el cursor */
         }
+
+        .info-icon {
+            position: fixed;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            bottom: 0;
+            right: 0;
+            margin: 5px 5px;
+        }
+
+        #popup {
+            width: 50%;
+            height: 50%;
+            background-color: #000000;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.3rem;
+            border: 1px solid #ffffff;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #close-popup {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -134,13 +165,32 @@
             <li><img src="icons/volume_on.svg" class="icon" alt="Sound" title="Sound" id="volume-icon"></li>
             <li><img src="icons/save.svg" class="icon" alt="Save" title="Save" id="save-icon"></li>
             <li><img src="icons/open_full.svg" class="icon" alt="Full screen" title="Full screen" id="fullscreen-icon">
+            </li>
             <li><img src="icons/analyze.svg" class="icon" alt="Analyze" title="Analyze" id="analyze-icon"></li>
         </ul>
     </div>
+    <div>
+        <li><img src="icons/info.svg" class="info-icon" alt="Info" title="Info" id="info-icon"></li>
+    </div>
+
     <div class="word-count" id="word-count" title="Words">0</div>
 
-    <script>
+    <div id="popup">
+        <p>Distraction-Free is a web-app designed for those who wants to stay focused on their writing.</p>
+        <br>
+        <p>I don't storage or collect any data, all you type here is stored in your browser.</p>
+        <p>I'm work alone, I'm not a big coorporation trying to steal your data, i swear. :D</p>
+        <p>If you find this web useful, you can donate me, but it's up to you.</p>
 
+        <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js"
+            data-name="bmc-button" data-slug="ozwick" data-color="#000000" data-emoji="🍕" data-font="Bree"
+            data-text="Buy me a pizza" data-outline-color="#ffffff" data-font-color="#ffffff"
+            data-coffee-color="#FFDD00"></script>
+        <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
+
+    </div>
+
+    <script>
         const fullscreenIcon = document.getElementById('fullscreen-icon');
         const saveIcon = document.getElementById('save-icon');
         const fontIcon = document.getElementById('font-icon');
@@ -149,6 +199,9 @@
         const textarea = document.getElementById('text-editor');
         const wordCount = document.getElementById('word-count');
         const analyzeIcon = document.getElementById('analyze-icon');
+        const infoIcon = document.getElementById('info-icon');
+        const closePopup = document.getElementById('close-popup');
+        const popup = document.getElementById('popup');
         const fonts = [
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
@@ -188,31 +241,26 @@
         }
 
         function loadEditorState() {
-            const savedText = localStorage.getItem('textEditorContent');
-            if (savedText) {
-                textarea.value = savedText;
-                updateWordCount();  // Actualiza el contador al cargar el contenido
+            const savedContent = localStorage.getItem('textEditorContent');
+            const savedFontIndex = localStorage.getItem('currentFontIndex');
+            const savedSoundState = localStorage.getItem('soundEnabled');
+
+            if (savedContent !== null) {
+                textarea.value = savedContent;
+                updateWordCount();
             }
 
-            const savedFontIndex = localStorage.getItem('currentFontIndex');
             if (savedFontIndex !== null) {
                 currentFontIndex = parseInt(savedFontIndex, 10);
                 textarea.style.fontFamily = fonts[currentFontIndex];
             }
 
-            const savedSoundEnabled = localStorage.getItem('soundEnabled');
-            if (savedSoundEnabled !== null) {
-                soundEnabled = JSON.parse(savedSoundEnabled);
+            if (savedSoundState !== null) {
+                soundEnabled = savedSoundState === 'true';
                 volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
             }
         }
 
-        // Cargar estado guardado al cargar la página
-        document.addEventListener('DOMContentLoaded', loadEditorState);
-
-        // Guardar estado al salir de la página
-        window.addEventListener('beforeunload', saveEditorState);
-
         fullscreenIcon.addEventListener('click', () => {
             if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen();
@@ -221,74 +269,56 @@
                     document.exitFullscreen();
                 }
             }
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                if (document.fullscreenElement) {
-                    document.exitFullscreen();
-                }
-                document.activeElement.blur();
-            } else if (soundEnabled && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
-                keySound.currentTime = 0;
-                keySound.play();
-            }
-        });
-
-        fullscreenIcon.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                }
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            fullscreenIcon.src = document.fullscreenElement ? 'icons/close_full.svg' : 'icons/open_full.svg';
-        });
-
-
-
-        saveIcon.addEventListener('click', () => {
-            const text = textarea.value;
-            const filename = prompt('Enter the file name (including extension, e.g., filename.txt or filename.docx):');
-            if (!filename) return;
-
-            const [name, extension] = filename.split('.');
-            if (!extension) {
-                alert('Please include the file extension.');
-                return;
-            }
-
-            if (extension === 'txt') {
-                const blob = new Blob([text], { type: 'text/plain' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                link.click();
-            } else if (extension === 'docx') {
-                const blob = new Blob([text], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                link.click();
-            } else {
-                alert('Unsupported format. Use "txt" or "docx".');
-            }
-        });
-
-
-        fontIcon.addEventListener('click', () => {
-            currentFontIndex = (currentFontIndex + 1) % fonts.length;
-            textarea.style.fontFamily = fonts[currentFontIndex];
         });
 
         volumeIcon.addEventListener('click', () => {
             soundEnabled = !soundEnabled;
             volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
+            saveEditorState();
+        });
+
+        fontIcon.addEventListener('click', () => {
+            currentFontIndex = (currentFontIndex + 1) % fonts.length;
+            textarea.style.fontFamily = fonts[currentFontIndex];
+            saveEditorState();
+        });
+
+        saveIcon.addEventListener('click', () => {
+            const textToSave = textarea.value;
+            const blob = new Blob([textToSave], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'document.txt';
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+
+        textarea.addEventListener('keypress', (event) => {
+            if (soundEnabled) {
+                keySound.currentTime = 0;
+                keySound.play();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Cargar el estado del editor al cargar la página
+        window.addEventListener('load', loadEditorState);
+
+        infoIcon.addEventListener('click', () => {
+            popup.style.display = 'block';
+
+        });
+
+        closePopup.addEventListener('click', () => {
+            popup.style.display = 'none';
         });
     </script>
 </body>
