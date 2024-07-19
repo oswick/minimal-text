@@ -2,7 +2,7 @@
     const fetch = await import('node-fetch');
   
     async function sendUrlsToIndexNow(host, key, keyLocation, urlList) {
-      const indexNowUrl = 'https://api.indexnow.org/indexnow';  // URL correcta para la API
+      const indexNowUrl = 'https://api.indexnow.org/';  // URL correcta para la API
   
       const body = {
         host: host,
