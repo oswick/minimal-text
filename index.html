@@ -9,7 +9,11 @@
     <meta name="description"
         content="Minimal Distraction-Free is a private text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/svg" href="icons/logo2.svg">
-
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Novella">
+<link rel="apple-touch-icon" href="images/logo192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -192,6 +196,62 @@
         .info-icon.script-mode {
             filter: invert(1);
         }
+
+        #timerpopup {
+            color: white;
+            background-color: #000000;
+            width: 30%;
+            height: 30%;
+            text-align: center;
+            line-height: 1.3rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            border: 1px solid #ffffff;
+            transform: translate(-50%, -50%);
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+
+        #timer-input {
+            color: white;
+            background-color: #000000;
+            width: 20%;
+            border: 1px solid #ffffff;
+            border-radius: 5px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        #timer-input::-webkit-outer-spin-button,
+        #timer-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+
+        #start-timer {
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            position: calc(50% - 15px);
+            right: 50%;
+            left: 50%;
+        }
+
+        #close-timer-popup {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: transparent;
+            border: 10px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+        }
     </style>
 </head>
 
@@ -205,6 +265,7 @@
             <li><img src="icons/open_full.svg" class="icon" alt="Full screen" title="Full screen" id="fullscreen-icon">
             </li>
             <li><img src="icons/theaters.svg" class="icon" alt="Script mode" title="Script mode" id="script-icon"></li>
+            <li><img src="icons/timer.svg" class="icon" alt="Timer" title="Timer" id="timer-icon"></li>
             <li><img src="icons/analyze.svg" class="icon" alt="Analyze" title="Analyze" id="analyze-icon"></li>
         </ul>
     </div>
@@ -223,6 +284,34 @@
         <p>Made by Oswick</p>
         <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
     </div>
+
+
+    <div id="timerpopup" style="font-family: monospace;">
+        <h3>Set Timer</h3>
+        <br>
+        <label for="timer-input" style="font-family: monospace;">Minutes:</label>
+        <input type="number" id="timer-input" min="1" max="120" value="25">
+        <br>
+        <img src="icons/play_arrow.svg" id="start-timer" alt="Start Timer" title="Start Timer">
+        <img src="icons/close.svg" id="close-timer-popup" title="Close">
+
+    </div>
+    <div id="timer-display" style="display:none; 
+        position: fixed; 
+        top: 5px; 
+        right: 5px; 
+        background-color: rgba(0,0,0,0.5); 
+        color: #fff; 
+        padding: 5px; 
+        justify-items: center;
+        align-items: center;
+        border-radius: 5px;">
+        <span id="time-left"></span>
+        <br>
+        <img src="icons/play_arrow.svg" id="play-timer">
+        <img src="icons/pause.svg" id="pause-timer">
+        <img src="icons/stop.svg" id="stop-timer">
+    </div>
     <script>
 
         const fullscreenIcon = document.getElementById('fullscreen-icon');
@@ -237,6 +326,19 @@
         const popup = document.getElementById('popup');
         const closePopup = document.getElementById('close-popup');
         const scriptIcon = document.getElementById('script-icon');
+
+        const timerIcon = document.getElementById('timer-icon');
+        const closeTimer = document.getElementById('close-timer-popup');
+        const timerInput = document.getElementById('timer-input');
+        const startIcon = document.getElementById('start-timer');
+        const timerDisplay = document.getElementById('timer-display');
+        const timeLeftSpan = document.getElementById('time-left');
+        const playTimerBtn = document.getElementById('play-timer');
+        const pauseTimerBtn = document.getElementById('pause-timer');
+        const stopTimerBtn = document.getElementById('stop-timer');
+        const timerPopup = document.getElementById('timerpopup');
+
+
         const fonts = [
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
@@ -248,6 +350,10 @@
         let currentFontIndex = 0;
         let soundEnabled = true;
         let scriptModeEnabled = false;
+        let timerInterval;
+        let timeLeft;
+        let isTimerRunning = false;
+        let timerStartTimestamp;
 
         function toggleScriptMode() {
             scriptModeEnabled = !scriptModeEnabled;
@@ -283,6 +389,90 @@
             popup.style.display = 'none';
         });
 
+
+
+
+        timerIcon.addEventListener('click', () => {
+            timerPopup.style.display = 'block';
+        });
+
+        closeTimer.addEventListener('click', () => {
+            timerPopup.style.display = 'none';
+        });
+
+        startIcon.addEventListener('click', () => {
+            const minutes = parseInt(timerInput.value);
+            if (minutes > 0 && minutes <= 120) {
+                timeLeft = minutes * 60;
+                updateTimerDisplay();
+                timerPopup.style.display = 'none';
+                timerDisplay.style.display = 'block';
+                startTimer();
+            } else {
+                alert('Please enter a valid time between 1 and 120 minutes.');
+            }
+        });
+        playTimerBtn.addEventListener('click', startTimer);
+        pauseTimerBtn.addEventListener('click', pauseTimer);
+        stopTimerBtn.addEventListener('click', stopTimer);
+
+        function startTimer() {
+            if (!isTimerRunning) {
+                isTimerRunning = true;
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    saveEditorState();
+                    if (timeLeft <= 0) {
+                        stopTimer();
+                        sendNotification('Time is up!');
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            saveEditorState();
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerDisplay.style.display = 'none';
+            localStorage.removeItem('timerEndTime');
+            localStorage.removeItem('timerTimeLeft');
+            localStorage.setItem('timerRunning', false);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeLeftSpan.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        function sendNotification(message) {
+            if ("Notification" in window) {
+                if (Notification.permission === "granted") {
+                    new Notification(message);
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(function (permission) {
+                        if (permission === "granted") {
+                            new Notification(message);
+                        }
+                    });
+                }
+            }
+            alert(message); // Fallback for browsers that don't support notifications
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            loadEditorState();
+            if ("Notification" in window) {
+                Notification.requestPermission();
+            }
+        });
+
+
         const normalKeySound = new Audio('audio/sound.mp3');
         const scriptKeySound = new Audio('audio/meca.mp3');
 
@@ -312,6 +502,16 @@
             localStorage.setItem('currentFontIndex', currentFontIndex);
             localStorage.setItem('soundEnabled', soundEnabled);
             localStorage.setItem('scriptModeEnabled', scriptModeEnabled);
+            localStorage.setItem('timerTimeLeft', timeLeft);
+            localStorage.setItem('timerRunning', isTimerRunning);
+            localStorage.setItem('timerStartTimestamp', timerStartTimestamp);
+
+            if (isTimerRunning) {
+                localStorage.setItem('timerEndTime', Date.now() + timeLeft * 1000);
+            } else {
+                localStorage.setItem('timerTimeLeft', timeLeft);
+            }
+            localStorage.setItem('timerRunning', isTimerRunning);
         }
 
         function loadEditorState() {
@@ -349,6 +549,30 @@
                 } else {
                     keySound = normalKeySound; // Establecer el sonido normal
 
+                }
+                // ... other loads ...
+                const savedTimerRunning = localStorage.getItem('timerRunning');
+                const savedTimerEndTime = localStorage.getItem('timerEndTime');
+                const savedTimeLeft = localStorage.getItem('timerTimeLeft');
+
+                if (savedTimerRunning === 'true') {
+                    if (savedTimerEndTime) {
+                        const now = Date.now();
+                        const endTime = parseInt(savedTimerEndTime);
+                        if (endTime > now) {
+                            timeLeft = Math.ceil((endTime - now) / 1000);
+                            updateTimerDisplay();
+                            timerDisplay.style.display = 'block';
+                            startTimer();
+                        } else {
+                            stopTimer();
+                            sendNotification('Time is up!');
+                        }
+                    }
+                } else if (savedTimeLeft) {
+                    timeLeft = parseInt(savedTimeLeft);
+                    updateTimerDisplay();
+                    timerDisplay.style.display = 'block';
                 }
             }
         }
@@ -488,17 +712,18 @@
         });
     </script>
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js').then((registration) => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }, (err) => {
-                    console.log('ServiceWorker registration failed: ', err);
-                });
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+              console.log('Service Worker registered successfully:', registration.scope);
+            })
+            .catch((error) => {
+              console.log('Service Worker registration failed:', error);
             });
-        }
+        });
+      }
     </script>
-
 </body>
 
 </html>
