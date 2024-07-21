@@ -9,13 +9,17 @@
     <meta name="description"
         content="Minimal Distraction-Free is a private text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/svg" href="icons/logo2.svg">
-   
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
@@ -159,9 +163,34 @@
             height: 30px;
             text-align: center;
         }
+
         a {
             color: #ffffff;
             text-decoration: none;
+        }
+
+        .icons.script-mode {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .icons.script-mode:hover,
+        .info-icon.script-mode:hover {
+            opacity: 1;
+        }
+
+        .info-icon.script-mode {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .word-count.script-mode {
+            color: #000000;
+        }
+
+        .icons.script-mode img,
+        .info-icon.script-mode {
+            filter: invert(1);
         }
     </style>
 </head>
@@ -175,6 +204,7 @@
             <li><img src="icons/save.svg" class="icon" alt="Save" title="Save" id="save-icon"></li>
             <li><img src="icons/open_full.svg" class="icon" alt="Full screen" title="Full screen" id="fullscreen-icon">
             </li>
+            <li><img src="icons/theaters.svg" class="icon" alt="Script mode" title="Script mode" id="script-icon"></li>
             <li><img src="icons/analyze.svg" class="icon" alt="Analyze" title="Analyze" id="analyze-icon"></li>
         </ul>
     </div>
@@ -188,7 +218,9 @@
         <p>Distraction-Free is a web-app designed for those who wants to stay focused on their writing.</p>
         <p>I don't storage or collect any data, all you type here is stored in your browser.</p>
         <p>I'm work alone, I'm not a big coorporation trying to steal your data, i swear. :D</p>
-        <p>Thanks to <a href="https://idx.google.com/">IDX Project</a> and <a href="https://fonts.google.com/">Google Icons & Fonts</a></p>
+        <p>Thanks to <a href="https://idx.google.com/">IDX Project</a> and <a href="https://fonts.google.com/">Google
+                Icons & Fonts</a></p>
+        <p>Made by Oswick</p>
         <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
     </div>
     <script>
@@ -204,7 +236,7 @@
         const infoIcon = document.getElementById('info-icon');
         const popup = document.getElementById('popup');
         const closePopup = document.getElementById('close-popup');
-
+        const scriptIcon = document.getElementById('script-icon');
         const fonts = [
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
@@ -215,6 +247,33 @@
         ];
         let currentFontIndex = 0;
         let soundEnabled = true;
+        let scriptModeEnabled = false;
+
+        function toggleScriptMode() {
+            scriptModeEnabled = !scriptModeEnabled;
+            if (scriptModeEnabled) {
+                document.body.style.backgroundColor = '#FFF18D';
+                textarea.style.backgroundColor = '#FFF18D';
+                textarea.style.color = '#000000';
+                textarea.style.fontFamily = 'Courier, monospace';
+                iconContainer.classList.add('script-mode');
+                infoIcon.classList.add('script-mode');
+                wordCount.classList.add('script-mode');
+                keySound = scriptKeySound; // Cambia el sonido al de la máquina de escribir
+
+            } else {
+                document.body.style.backgroundColor = '#000000';
+                textarea.style.backgroundColor = '#000000';
+                textarea.style.color = 'lightgray';
+                textarea.style.fontFamily = fonts[currentFontIndex];
+                iconContainer.classList.remove('script-mode');
+                infoIcon.classList.remove('script-mode');
+                wordCount.classList.remove('script-mode');
+                keySound = normalKeySound; // Vuelve al sonido normal
+            }
+            saveEditorState(); // Guarda el estado después de cambiar el modo
+        }
+        scriptIcon.addEventListener('click', toggleScriptMode);
 
         infoIcon.addEventListener('click', () => {
             popup.style.display = 'block';
@@ -224,8 +283,8 @@
             popup.style.display = 'none';
         });
 
-
-        const keySound = new Audio('audio/sound.mp3');
+        const normalKeySound = new Audio('audio/sound.mp3');
+        const scriptKeySound = new Audio('audio/meca.mp3');
 
         // Función para contar palabras
         function countWords(text) {
@@ -252,13 +311,14 @@
             localStorage.setItem('textEditorContent', textarea.value);
             localStorage.setItem('currentFontIndex', currentFontIndex);
             localStorage.setItem('soundEnabled', soundEnabled);
+            localStorage.setItem('scriptModeEnabled', scriptModeEnabled);
         }
 
         function loadEditorState() {
             const savedText = localStorage.getItem('textEditorContent');
             if (savedText) {
                 textarea.value = savedText;
-                updateWordCount();  // Actualiza el contador al cargar el contenido
+                updateWordCount();
             }
 
             const savedFontIndex = localStorage.getItem('currentFontIndex');
@@ -272,11 +332,29 @@
                 soundEnabled = JSON.parse(savedSoundEnabled);
                 volumeIcon.src = soundEnabled ? 'icons/volume_on.svg' : 'icons/volume_off.svg';
             }
+
+            const savedScriptMode = localStorage.getItem('scriptModeEnabled');
+            if (savedScriptMode !== null) {
+                scriptModeEnabled = JSON.parse(savedScriptMode);
+                if (scriptModeEnabled) {
+                    // Apply script mode styles directly instead of calling toggleScriptMode
+                    document.body.style.backgroundColor = '#FFF18D';
+                    textarea.style.backgroundColor = '#FFF18D';
+                    textarea.style.color = '#000000';
+                    textarea.style.fontFamily = 'Courier, monospace';
+                    iconContainer.classList.add('script-mode');
+                    infoIcon.classList.add('script-mode');
+                    wordCount.classList.add('script-mode');
+                    keySound = scriptKeySound; // Establecer el sonido de máquina de escribir
+                } else {
+                    keySound = normalKeySound; // Establecer el sonido normal
+
+                }
+            }
         }
-
         // Cargar estado guardado al cargar la página
-        document.addEventListener('DOMContentLoaded', loadEditorState);
 
+        document.addEventListener('DOMContentLoaded', loadEditorState);
         // Guardar estado al salir de la página
         window.addEventListener('beforeunload', saveEditorState);
 
@@ -298,8 +376,9 @@
                 }
                 document.activeElement.blur();
             } else if (soundEnabled && !['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
-                keySound.currentTime = 0;
-                keySound.play();
+                const currentKeySound = scriptModeEnabled ? scriptKeySound : normalKeySound;
+                currentKeySound.currentTime = 0;
+                currentKeySound.play();
             }
         });
 
@@ -321,7 +400,7 @@
 
         saveIcon.addEventListener('click', () => {
             const text = textarea.value;
-            const filename = prompt('Enter the file name (including extension, e.g., filename.txt or filename.docx):');
+            const filename = prompt('Enter the file name (including extension, e.g., filename.txt, filename.docx, or filename.pdf):');
             if (!filename) return;
 
             const [name, extension] = filename.split('.');
@@ -337,16 +416,57 @@
                 link.download = filename;
                 link.click();
             } else if (extension === 'docx') {
-                const blob = new Blob([text], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                link.click();
+                const doc = new docx.Document({
+                    sections: [{
+                        properties: {},
+                        children: [
+                            new docx.Paragraph({
+                                children: [
+                                    new docx.TextRun({
+                                        text: text,
+                                        font: scriptModeEnabled ? "Courier" : textarea.style.fontFamily,
+                                        size: 24 // 12pt
+                                    })
+                                ]
+                            })
+                        ]
+                    }]
+                });
+
+                docx.Packer.toBlob(doc).then(blob => {
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = filename;
+                    link.click();
+                });
+            } else if (extension === 'pdf') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFont(scriptModeEnabled ? "courier" : "helvetica");
+                doc.setFontSize(12);
+
+                const textColor = scriptModeEnabled ? '#000000' : '#CCCCCC';
+                doc.setTextColor(textColor);
+
+                // Split the text into lines
+                const lines = doc.splitTextToSize(text, 190); // 190 is the max width
+
+                let y = 10; // Starting y position
+                for (let i = 0; i < lines.length; i++) {
+                    if (y > 280) { // If we're near the end of the page
+                        doc.addPage(); // Add a new page
+                        y = 10; // Reset y position
+                    }
+                    doc.text(10, y, lines[i]);
+                    y += 7; // Increment y position
+                }
+
+                doc.save(filename);
             } else {
-                alert('Unsupported format. Use "txt" or "docx".');
+                alert('Unsupported format. Use "txt", "docx", or "pdf".');
             }
         });
-
         fontIcon.addEventListener('click', () => {
             currentFontIndex = (currentFontIndex + 1) % fonts.length;
             textarea.style.fontFamily = fonts[currentFontIndex];
@@ -378,7 +498,7 @@
             });
         }
     </script>
-    
+
 </body>
 
 </html>
