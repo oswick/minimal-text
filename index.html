@@ -9,8 +9,13 @@
     <meta name="description"
         content="Minimal Distraction-Free is a private text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/svg" href="icons/logo2.svg">
+   
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
@@ -154,6 +159,10 @@
             height: 30px;
             text-align: center;
         }
+        a {
+            color: #ffffff;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -177,10 +186,9 @@
 
     <div id="popup">
         <p>Distraction-Free is a web-app designed for those who wants to stay focused on their writing.</p>
-        <br>
         <p>I don't storage or collect any data, all you type here is stored in your browser.</p>
         <p>I'm work alone, I'm not a big coorporation trying to steal your data, i swear. :D</p>
-        <p>If you find this web useful, you can donate me, but it's up to you.</p>
+        <p>Thanks to <a href="https://idx.google.com/">IDX Project</a> and <a href="https://fonts.google.com/">Google Icons & Fonts</a></p>
         <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
     </div>
     <script>
@@ -201,7 +209,9 @@
             "'Open Sans', sans-serif",
             "'Playfair Display', serif",
             "'Raleway', sans-serif",
-            "'Montserrat', sans-serif"
+            "'Montserrat', sans-serif",
+            "'Courier Prime', monospace",
+            "'Courier New', monospace"
         ];
         let currentFontIndex = 0;
         let soundEnabled = true;
