@@ -261,9 +261,9 @@
             position: fixed;
             top: 5px;
             right: 5px;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.2);
             color: #fff;
-            padding: 5px;
+            
             justify-items: center;
             align-items: center;
             border-radius: 1px solid #ffffff;
@@ -312,11 +312,10 @@
         <img src="icons/close.svg" id="close-timer-popup" title="Close">
 
     </div>
-    <div id="timer-display">
+    <div id="timer-display" style="display: none;">
         <span id="time-left"></span>
         <br>
-        <img src="icons/play_arrow.svg" id="play-timer">
-        <img src="icons/pause.svg" id="pause-timer">
+        <img src="icons/pause.svg" id="toggle-timer" alt="play/pause">
         <img src="icons/stop.svg" id="stop-timer">
     </div>
     <script>
@@ -340,8 +339,7 @@
         const startIcon = document.getElementById('start-timer');
         const timerDisplay = document.getElementById('timer-display');
         const timeLeftSpan = document.getElementById('time-left');
-        const playTimerBtn = document.getElementById('play-timer');
-        const pauseTimerBtn = document.getElementById('pause-timer');
+        const toggleTimerBtn = document.getElementById('toggle-timer');
         const stopTimerBtn = document.getElementById('stop-timer');
         const timerPopup = document.getElementById('timerpopup');
 
@@ -361,6 +359,7 @@
         let timeLeft;
         let isTimerRunning = false;
         let timerStartTimestamp;
+       
 
         function toggleScriptMode() {
             scriptModeEnabled = !scriptModeEnabled;
@@ -398,7 +397,7 @@
 
 
 
-
+        //*timer popup*//
         timerIcon.addEventListener('click', () => {
             timerPopup.style.display = 'block';
         });
@@ -419,13 +418,24 @@
                 alert('Please enter a valid time between 1 and 120 minutes.');
             }
         });
-        playTimerBtn.addEventListener('click', startTimer);
-        pauseTimerBtn.addEventListener('click', pauseTimer);
+
+        function updateTimerControls() {
+            toggleTimerBtn.src = isTimerRunning ? 'icons/pause.svg' : 'icons/play_arrow.svg';
+        }
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeLeftSpan.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+
+        toggleTimerBtn.addEventListener('click', toggleTimer);
         stopTimerBtn.addEventListener('click', stopTimer);
 
         function startTimer() {
             if (!isTimerRunning) {
                 isTimerRunning = true;
+                updateTimerControls();
                 timerInterval = setInterval(() => {
                     timeLeft--;
                     updateTimerDisplay();
@@ -441,8 +451,10 @@
         function pauseTimer() {
             clearInterval(timerInterval);
             isTimerRunning = false;
+            updateTimerControls();
             saveEditorState();
         }
+
 
         function stopTimer() {
             clearInterval(timerInterval);
@@ -451,13 +463,17 @@
             localStorage.removeItem('timerEndTime');
             localStorage.removeItem('timerTimeLeft');
             localStorage.setItem('timerRunning', false);
+            updateTimerControls();
         }
 
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeLeftSpan.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        function toggleTimer() {
+            if (isTimerRunning) {
+                pauseTimer();
+            } else {
+                startTimer();
+            }
         }
+
         function sendNotification(message) {
             if ("Notification" in window) {
                 if (Notification.permission === "granted") {
@@ -518,7 +534,7 @@
             } else {
                 localStorage.setItem('timerTimeLeft', timeLeft);
             }
-            localStorage.setItem('timerRunning', isTimerRunning);
+            localStorage.setItem('timerRunning', isTimerRunning.toString());
         }
 
         function loadEditorState() {
@@ -576,14 +592,17 @@
                         }
                     }
                 } else {
-                    // If the timer is not running, make sure it's hidden
                     timerDisplay.style.display = 'none';
                     if (savedTimeLeft) {
                         timeLeft = parseInt(savedTimeLeft);
-                        updateTimerDisplay(); // Update the display, but keep it hidden
+                        updateTimerDisplay();
                     }
                 }
+                updateTimerControls();
             }
+
+
+
         }
         // Cargar estado guardado al cargar la página
 
