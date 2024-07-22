@@ -7,13 +7,13 @@
     <meta name="google-site-verification" content="n-_6OltSv6jYo0N_XCA8Hp5vjSj3__BYaF_AP6UbQhw" />
     <title>Novella Minimal Distraction-Free Text Writer Online</title>
     <meta name="description"
-        content="Minimal Distraction-Free is a private text editor with a completely black background, perfect for focused writing">
+        content="Novella is a private text editor with a completely black background, perfect for focused writing">
     <link rel="icon" type="image/svg" href="icons/logo2.svg">
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Novella">
-<link rel="apple-touch-icon" href="images/logo192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Novella">
+    <link rel="apple-touch-icon" href="images/logo192.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -142,8 +142,8 @@
         }
 
         #popup {
-            width: 50%;
-            height: 50%;
+            width: 45%;
+            height: 45%;
             background-color: #000000;
             color: #ffffff;
             text-align: center;
@@ -154,6 +154,9 @@
             left: 50%;
             transform: translate(-50%, -50%);
             display: none;
+            text-align: center;
+            justify-content: center;
+            align-items: center;
         }
 
         #close-popup {
@@ -200,8 +203,8 @@
         #timerpopup {
             color: white;
             background-color: #000000;
-            width: 30%;
-            height: 30%;
+            width: 25%;
+            height: 25%;
             text-align: center;
             line-height: 1.3rem;
             position: absolute;
@@ -252,6 +255,19 @@
             width: 30px;
             height: 30px;
         }
+
+        #timer-display {
+            display: none;
+            position: fixed;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            padding: 5px;
+            justify-items: center;
+            align-items: center;
+            border-radius: 1px solid #ffffff;
+        }
     </style>
 </head>
 
@@ -276,19 +292,19 @@
     <div class="word-count" id="word-count" title="Words">0</div>
 
     <div id="popup">
+        <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
         <p>This is a web-app designed for those who want to stay focused on their writing.</p>
         <p>I don't storage or collect any data, all you type here is stored in your browser.</p>
         <p>I'm work alone, I'm not a big coorporation trying to steal your data, i swear. :D</p>
         <p>Thanks to <a href="https://idx.google.com/">IDX Project</a> and <a href="https://fonts.google.com/">Google
                 Icons & Fonts</a></p>
         <p>Made by Oswick</p>
-        <button id="close-popup"><img src="icons/close.svg" alt="close-icon" title="Close"></button>
     </div>
 
 
     <div id="timerpopup" style="font-family: monospace;">
         <h3>Set Timer</h3>
-        <br>
+        <p>Up to 120 minutes</p>
         <label for="timer-input" style="font-family: monospace;">Minutes:</label>
         <input type="number" id="timer-input" min="1" max="120" value="25">
         <br>
@@ -296,16 +312,7 @@
         <img src="icons/close.svg" id="close-timer-popup" title="Close">
 
     </div>
-    <div id="timer-display" style="display:none; 
-        position: fixed; 
-        top: 5px; 
-        right: 5px; 
-        background-color: rgba(0,0,0,0.5); 
-        color: #fff; 
-        padding: 5px; 
-        justify-items: center;
-        align-items: center;
-        border-radius: 5px;">
+    <div id="timer-display">
         <span id="time-left"></span>
         <br>
         <img src="icons/play_arrow.svg" id="play-timer">
@@ -550,7 +557,6 @@
                     keySound = normalKeySound; // Establecer el sonido normal
 
                 }
-                // ... other loads ...
                 const savedTimerRunning = localStorage.getItem('timerRunning');
                 const savedTimerEndTime = localStorage.getItem('timerEndTime');
                 const savedTimeLeft = localStorage.getItem('timerTimeLeft');
@@ -569,10 +575,13 @@
                             sendNotification('Time is up!');
                         }
                     }
-                } else if (savedTimeLeft) {
-                    timeLeft = parseInt(savedTimeLeft);
-                    updateTimerDisplay();
-                    timerDisplay.style.display = 'block';
+                } else {
+                    // If the timer is not running, make sure it's hidden
+                    timerDisplay.style.display = 'none';
+                    if (savedTimeLeft) {
+                        timeLeft = parseInt(savedTimeLeft);
+                        updateTimerDisplay(); // Update the display, but keep it hidden
+                    }
                 }
             }
         }
@@ -712,17 +721,17 @@
         });
     </script>
     <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then((registration) => {
-              console.log('Service Worker registered successfully:', registration.scope);
-            })
-            .catch((error) => {
-              console.log('Service Worker registration failed:', error);
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
             });
-        });
-      }
+        }
     </script>
 </body>
 
