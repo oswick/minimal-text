@@ -501,6 +501,16 @@
             if (!isTimerRunning) {
                 isTimerRunning = true;
                 updateTimerControls();
+
+                // Solicitar permisos de notificación solo si no se han concedido aún
+                if ("Notification" in window && Notification.permission !== "granted") {
+                    Notification.requestPermission().then(function (permission) {
+                        if (permission === "granted") {
+                            console.log("Notification permission granted.");
+                        }
+                    });
+                }
+
                 timerInterval = setInterval(() => {
                     timeLeft--;
                     updateTimerDisplay();
@@ -539,25 +549,16 @@
         }
 
         function sendNotification(message) {
-            if ("Notification" in window) {
-                if (Notification.permission === "granted") {
-                    new Notification(message);
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(function (permission) {
-                        if (permission === "granted") {
-                            new Notification(message);
-                        }
-                    });
-                }
+            if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(message);
+            } else {
+                // Si no hay permisos, usar un alert como fallback
+                alert(message);
             }
-            alert(message); // Fallback for browsers that don't support notifications
         }
 
         document.addEventListener('DOMContentLoaded', function () {
             loadEditorState();
-            if ("Notification" in window) {
-                Notification.requestPermission();
-            }
         });
 
         const normalKeySound = new Audio('audio/sound.mp3');
